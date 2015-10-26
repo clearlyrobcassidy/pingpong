@@ -1,0 +1,164 @@
+import pygame, sys, time
+from pygame.locals import *
+
+def main():
+   pygame.init()
+   
+   #General Window Information
+   WindowTitle = 'Ping Pong'
+   SurfaceDimensions = [1500, 900]
+   SurfaceSize = (SurfaceDimensions[0], SurfaceDimensions[1])
+   frameDelay = 0.01 
+   surface = pygame.display.set_mode(SurfaceSize, 0, 0)
+   pygame.display.set_caption(WindowTitle)
+   Color = pygame.Color('white')
+   
+   #Font Properties 
+   font = pygame.font.Font(None, 50)                
+   RGB = 250, 250, 250
+   
+   
+   gameOver = False
+   
+   
+   #Ball Starting Point
+   Centerx = int (SurfaceDimensions[0]/2)
+   Centery = int (SurfaceDimensions[1]/2)
+   center = [Centerx, Centery]
+   
+   
+   #Paddle Qualities   
+   Paddle1Distance = 50
+   PaddleLength = 150
+   PaddleWidth = 15
+   
+   Paddle2Distance = int (SurfaceDimensions[0] - Paddle1Distance - PaddleWidth)
+   PaddlePosition = int (SurfaceDimensions[1]/2 - PaddleLength/2)
+   
+   Rect = [Paddle1Distance, PaddlePosition, PaddleWidth, PaddleLength]
+   Rect2 = [Paddle2Distance, PaddlePosition, PaddleWidth, PaddleLength]
+   
+   
+   #Ball Qualities
+   BallMove = [8,2]
+   BallSize= [0,0]
+   
+   
+   #Player Score
+   Score= [0,0]
+    
+    
+   #Paddle Being Coonverted Into List For colliderect
+   tileRect = pygame.Rect(Rect[0], Rect[1], Rect[2], Rect[3])
+   tileRect2 = pygame.Rect(Rect2[0], Rect2[1], Rect2[2], Rect2[3])
+   
+   
+   #This causes the game to run/exit
+   while True:
+      for event in pygame.event.get():
+         if event.type == QUIT:
+            pygame.quit()
+            sys.exit()           
+      gameOver = update(center,surface,Rect,Rect2,tileRect,tileRect2,BallMove,BallSize,Score,RGB,font,Color,SurfaceDimensions,PaddleLength)
+      pygame.display.update()
+      time.sleep(frameDelay) 
+
+
+
+def update(center,surface,Rect,Rect2,tileRect,tileRect2,BallMove,BallSize,Score,RGB,font,Color,SurfaceDimensions,PaddleLength):
+
+   #Plaer 1 win condition
+   if Score[0]== 11:
+      return True 
+   #Plaer 2 win condition
+   elif Score[1]== 11:
+      return True
+   #Actual Game
+   else:
+      #No sure what this does exactly
+      for index in range(0, 2):
+         
+         #Fills screen with black (Clear Screen)
+         surface.fill(pygame.Color('black'))      
+         
+         #Update ball movemen
+         center[1] = center[1] + BallMove[1]
+         center[0] = center[0] + BallMove[0]
+                
+         #Create collision based Objecs
+         CircleShape = pygame.draw.circle(surface, Color, center, 10 , 0)
+         tileRect = pygame.Rect(Rect[0], Rect[1], Rect[2], Rect[3])
+         tileRect2 = pygame.Rect(Rect2[0], Rect2[1], Rect2[2], Rect2[3])         
+         
+         #Draw Objects         
+         CircleShape
+         pygame.draw.rect (surface, Color, Rect, 0)
+         pygame.draw.rect (surface, Color, Rect2, 0)         
+         
+         #Create the Score for Plaer 1 and 2     
+         ScoreLeftRen = font.render(str(Score[0]), 0, RGB)
+         ScoreRightRen = font.render(str(Score[1]), 0, RGB)
+         
+         #Actually draw it with blit function
+         surface.blit( ScoreLeftRen, (80, 10))
+         surface.blit( ScoreRightRen, (1380, 10))
+         
+         #Controls of the Game                 
+         if( pygame.key.get_pressed()[pygame.K_w] != 0 ):
+            if Rect[1] <= 0:
+               Rect[1] == 0            
+            else:
+               Rect[1] =  Rect[1] - 7
+          
+         if( pygame.key.get_pressed()[pygame.K_s] != 0 ):            
+            if Rect[1] >= (SurfaceDimensions[1]-PaddleLength):
+               Rect[1] == (SurfaceDimensions[1]-PaddleLength)
+            else:   
+               Rect[1] =  Rect[1] + 7                        
+            
+         if( pygame.key.get_pressed()[pygame.K_UP] != 0 ):
+            if Rect2[1] <= 0:
+               Rect2[1] == 0            
+            else:
+               Rect2[1] =  Rect2[1] - 7
+                      
+         if( pygame.key.get_pressed()[pygame.K_DOWN] != 0 ):
+            if Rect2[1] >= (SurfaceDimensions[1]-PaddleLength):
+               Rect2[1] == (SurfaceDimensions[1]-PaddleLength)            
+            else:            
+               Rect2[1] =  Rect2[1] + 7            
+                     
+         if BallMove[0] < 0:
+            BallSize [0]= center[0] - 10
+            if tileRect.colliderect(CircleShape):               
+               BallMove[0] *= -1            
+         if BallMove[1] < 0:   
+            BallSize [1]= center[1] - 10            
+         if BallMove[0] > 0:
+            BallSize [0]= center[0] + 10
+            if tileRect2.colliderect(CircleShape):              
+               BallMove[0] *= -1            
+         if BallMove[1] > 0:   
+            BallSize [1]= center[1] + 10            
+            
+               
+         if BallSize [1] > SurfaceDimensions[1]:    
+            BallMove[1] *= -1
+         elif BallSize [1] <0:     
+            BallMove[1] *= -1 
+            
+         if BallSize [0] > SurfaceDimensions[0]:                        
+            Score[0] = Score[0] + 1
+            BallMove[0] *= -1            
+         elif BallSize [0] <0:            
+            Score[1] = Score[1] + 1
+            BallMove[0] *= -1 
+                      
+            
+                     
+         pygame.display.update()
+              
+      return False
+
+main()
+
